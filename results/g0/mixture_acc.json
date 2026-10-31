@@ -1,0 +1,114 @@
+{
+ "full|q0|greedy": {
+  "acc": 0.78,
+  "b2": null,
+  "mean_len": 258.172,
+  "mean_spent_mu2": 0.0,
+  "share_over_budget": 0.0
+ },
+ "full|q0|sample": {
+  "acc": 0.772,
+  "b2": null,
+  "mean_len": 254.186,
+  "mean_spent_mu2": 0.0,
+  "share_over_budget": 0.0
+ },
+ "full|fixed_b2_budget|greedy": {
+  "acc": 0.786,
+  "b2": 0.002473584830498347,
+  "mean_len": 256.936,
+  "mean_spent_mu2": 0.6355538986623287,
+  "share_over_budget": 0.512
+ },
+ "full|fixed_b2_budget|sample": {
+  "acc": 0.79,
+  "b2": 0.002473584830498347,
+  "mean_len": 254.434,
+  "mean_spent_mu2": 0.6293649704754353,
+  "share_over_budget": 0.51
+ },
+ "full|fixed_b2_0.01|greedy": {
+  "acc": 0.786,
+  "b2": 0.01,
+  "mean_len": 256.896,
+  "mean_spent_mu2": 2.56895799100399,
+  "share_over_budget": 1.0
+ },
+ "full|fixed_b2_0.01|sample": {
+  "acc": 0.774,
+  "b2": 0.01,
+  "mean_len": 253.198,
+  "mean_spent_mu2": 2.531978023767471,
+  "share_over_budget": 1.0
+ },
+ "full|filter|greedy": {
+  "acc": 0.782,
+  "b2": null,
+  "mean_len": 256.602,
+  "mean_spent_mu2": 0.6209457114934921,
+  "share_over_budget": 0.674
+ },
+ "full|filter|sample": {
+  "acc": 0.79,
+  "b2": null,
+  "mean_len": 253.236,
+  "mean_spent_mu2": 0.6209456557035447,
+  "share_over_budget": 0.69
+ },
+ "p0.95|q0|greedy": {
+  "acc": 0.78,
+  "b2": null,
+  "mean_len": 258.172,
+  "mean_spent_mu2": 0.0,
+  "share_over_budget": 0.0
+ },
+ "p0.95|q0|sample": {
+  "acc": 0.774,
+  "b2": null,
+  "mean_len": 252.11,
+  "mean_spent_mu2": 0.0,
+  "share_over_budget": 0.0
+ },
+ "p0.95|fixed_b2_budget|greedy": {
+  "acc": 0.786,
+  "b2": 0.002473584830498347,
+  "mean_len": 256.97,
+  "mean_spent_mu2": 0.6356380009055138,
+  "share_over_budget": 0.512
+ },
+ "p0.95|fixed_b2_budget|sample": {
+  "acc": 0.788,
+  "b2": 0.002473584830498347,
+  "mean_len": 253.968,
+  "mean_spent_mu2": 0.6282122748494148,
+  "share_over_budget": 0.492
+ },
+ "p0.95|fixed_b2_0.01|greedy": {
+  "acc": 0.788,
+  "b2": 0.01,
+  "mean_len": 257.028,
+  "mean_spent_mu2": 2.570277989625931,
+  "share_over_budget": 1.0
+ },
+ "p0.95|fixed_b2_0.01|sample": {
+  "acc": 0.788,
+  "b2": 0.01,
+  "mean_len": 254.702,
+  "mean_spent_mu2": 2.5470180114507674,
+  "share_over_budget": 1.0
+ },
+ "p0.95|filter|greedy": {
+  "acc": 0.776,
+  "b2": null,
+  "mean_len": 258.726,
+  "mean_spent_mu2": 0.6209565634727479,
+  "share_over_budget": 1.0
+ },
+ "p0.95|filter|sample": {
+  "acc": 0.764,
+  "b2": null,
+  "mean_len": 255.556,
+  "mean_spent_mu2": 0.6209563802480698,
+  "share_over_budget": 1.0
+ }
+}

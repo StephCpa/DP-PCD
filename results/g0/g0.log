@@ -1,0 +1,18 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:00<00:00,  1.47it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00,  2.94it/s]
+Using the latest cached version of the dataset since openai/gsm8k couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'main' at /home/wlwuser/.cache/huggingface/datasets/openai___gsm8k/main/0.0.0/740312add88f781978c0658806c59bc2815b9866 (last modified on Mon Sep 28 18:26:37 2026).
+[    378s] headroom q0 0.778
+[    677s] headroom teacher_r 0.944
+[   1327s] rollouts done 2000
+[   1332s] scored 0
+[   1355s] scored 200
+[   1378s] scored 400
+[   1401s] scored 600
+[   1423s] scored 800
+[   1446s] scored 1000
+[   1469s] scored 1200
+[   1492s] scored 1400
+[   1513s] scored 1600
+[   1534s] scored 1800
+[   1557s] DONE
