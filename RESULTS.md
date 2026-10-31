@@ -2,7 +2,7 @@
 
 Everything in the plan that runs without the LLM has been run: the Phase 0 accountant and budget table, the efficiency-estimate machinery, the Phase 3 filter witness and audit validation, the analytic simulator, and a toy CPU pilot of all ten arms. The LLM phases (G0 divergence profile and teacher headroom, Phase 1, Phase 2, the LLM audits) did not run. This environment has no GPU and cannot reach `huggingface.co`. **No gate (G0, G1, G2) has been decided.**
 
-The zero-GPU work found five problems in the plan that should be fixed before GPU time is spent (Findings 1–5). Findings 6–8 are about the method.
+The zero-GPU work found five problems in the plan that should be fixed before GPU time is spent (Findings 1–5). Findings 6–9 are about the method. In the toy pilot, tuned DP-SGD beat every signal-layer arm at ε = 4, and the gap widened with n (Finding 9). That makes H3 the riskiest hypothesis.
 
 ## Findings that change the plan
 
@@ -17,6 +17,7 @@ The zero-GPU work found five problems in the plan that should be fixed before GP
 6. **The filter's gain is set by the cold-token floor.** The gain of realized-divergence accounting over a fixed b₂ is b₂ / E[min(D_t, b₂)]. It clears the 3× gate only when most tokens carry divergence well below b₂, roughly a median μ_t² under b₂/10, with under about 20% hot tokens. If putting r in context perturbs every token a little, the gain disappears (E1). Record-specific divergence also uses up the filter's budget (simulator: the filter gains 2.5× in utility at τ = 0 and nothing at τ = 0.5, E4). The first thing to measure in G0 is the median per-token divergence on Qwen3 rollouts.
 7. **The filter is valid, and the checks catch real bugs.** Across 72 toy LMs, the exact Rényi divergence of the whole filtered run never exceeds its budget; the maximum ratio is exactly 1.000. A last-token overspend control violated the budget in 57/72 runs and a wrong-order control in 72/72 (E2). Our own pilot had a parallel-rollout overspend bug (ledger at 1.22× budget), which the ledger assertion caught and we fixed (E5).
 8. **Direction ④'s conjecture is not supported.** In the simulator, DP widens the gap between sampled-token and full-distribution feedback rather than collapsing it. The gap is 0.12 headroom non-privately and 0.24 at ε = 4 (state world, n = 4,096) (E4). One caveat: the simulator's vocabulary has 32 tokens, and a full-vector Gaussian release over a 150k vocabulary would not be practical.
+9. **In the toy pilot, DP-SGD wins and pulls further ahead as n grows.** At ε = 4 the best signal-layer arm trailed B1 (DP-SFT) by 4.6 points (paired difference −4.6, 95% CI [−6.2, −3.0]). B1's lead over M1, M2b and M3 grew from 1.8 to 10.4 points as n went from 1,024 to 16,384. Per-record releases carry independent noise, so their SNR grows as √n, while DP-SGD aggregates before adding noise. H3 therefore depends on DP-SGD's effective dimension for LoRA on Qwen3 being large relative to n. Run B1 against the best M arm at n = 4,096 early in Phase 2 (the plan's "DP-SGD dominates" early signal), before committing to the full 90-run grid (E5).
 
 ## Status by plan item
 
@@ -27,13 +28,13 @@ The zero-GPU work found five problems in the plan that should be fixed before GP
 | Phase 0: divergence profile on Qwen3 rollouts | Blocked (model access, GPU) | estimator ready: `dpcd/efficiency.py` |
 | Phase 0: efficiency estimate | Machinery done, run on synthetic profiles only | E1 |
 | Phase 0: teacher headroom | Blocked (model access, GPU) | |
-| Phase 1: headroom, shared component, leakage | Toy pilot only | E5 |
-| Phase 2: main DP grid | Toy pilot only | E5 |
+| Phase 1: headroom, shared component, leakage | Toy pilot only: +15.5 headroom, half-split keeps 64–71%, no leakage measurable in the toy | E5 |
+| Phase 2: main DP grid | Toy pilot only: best M arm − best B arm = −4.6 points at ε = 4 | E5 |
 | Phase 3: filter witness | Done (exact enumeration) | E2 |
 | Phase 3: one-run canary audit | Validated; ceiling and power measured | E3, E5 |
 | Phase 3: selection swap | Done in the pilot: 0 changes for M2b/M3 chunk selection | E5 |
 | Phase 3: leak demonstration | Done in simulation; only caught with enough canaries | E3 |
-| Ablations: predictions | Tested in the simulator | E4 |
+| Ablations: predictions | Tested in the simulator; on-policy vs off-policy tested in the toy pilot | E4, E5 |
 | Direction ④: reverse-KL limits under DP | Tested in the simulator | E4 |
 
 ## E0: budget table and accounting checks
@@ -118,7 +119,38 @@ The realized-divergence filter (M3) matched M2 at ε = 1 and 4, where tuning pic
 
 ## E5: toy CPU pilot of all ten arms
 
-Pending: the pilot was still running at this commit; this section is filled in by the next commit.
+A synthetic stand-in for Phases 1–3, so the arms, accounting, schedules and audits could be exercised end to end on CPU. **It is not the LLM experiment, and its numbers say nothing directly about Qwen3.**
+
+Setup: the student is a log-linear autoregressive policy with d = 790 parameters, answering 4-token problems over 10 symbols. The base model reaches 42.9% exact match. The teacher is the frozen base with a logit boost of 3 toward the private worked solution r, and 25% of r's tokens are record-specific noise. There are n = 4,096 records plus 256 canaries, 2 epochs of 64 problems per update, and 4 rollouts. Each arm got 6 configurations at ε = 4 on a separate proxy task, extended until the best was interior. M2/M3 use a public λ̂ measured on the proxy at each ε. Full tables: [results/e5_pilot/tables.md](results/e5_pilot/tables.md).
+
+![Toy pilot](results/figures/pilot.png)
+
+Held-out exact match (%), mean ± sd over training seeds (5 at ε = 4, 3 otherwise):
+
+| Arm | ε = 1 | ε = 4 | ε = 8 | Non-private |
+|---|---|---|---|---|
+| R0 base | | | | 42.9 |
+| R1 SFT | | | | 56.7 ± 0.4 |
+| R2 OPSD | | | | 58.4 ± 0.8 |
+| R3 privileged-sample imitation | | | | 57.1 ± 1.3 |
+| B1 DP-SFT | 47.9 ± 0.4 | 49.6 ± 0.5 | 50.9 ± 0.3 | |
+| B2 DP-OPSD (replace-one accounting) | 44.2 ± 0.2 | 46.8 ± 0.7 | 47.6 ± 0.6 | |
+| M1 Gaussian log-ratio | 42.3 ± 0.8 | 43.9 ± 0.3 | 45.2 ± 0.7 | |
+| M2a DP-Fusion synthetic SFT | 36.7 ± 1.0 | 45.0 ± 1.0 | 51.9 ± 0.5 | |
+| M2b DP-Fusion on-policy chunks | 38.2 ± 2.3 | 42.9 ± 1.1 | 47.7 ± 0.5 | |
+| M3 filtered chunks | 38.5 ± 1.9 | 43.2 ± 1.7 | 47.1 ± 0.4 | |
+
+- **Toy primary endpoint fails.** At ε = 4 the best M arm (M2a) trails the best B arm (B1) by 4.6 points, paired 95% CI [−6.2, −3.0] over 5 seeds. At ε = 8, M2a edges B1 by 0.9 [−0.3, +2.2] (3 seeds). At ε = 1, M1 sits at base and the DP-Fusion arms fall 4–6 points below it, because λ̂ is only 0.04–0.10 and the learning rate was tuned at ε = 4.
+- **The gap to DP-SGD grows with n.** At ε = 4, B1 leads the best of M1, M2b and M3 (the arms in the n sweep) by 1.8 points at n = 1,024, 5.7 at 4,096 and 10.4 at 16,384. This matches the accounting. Each record's releases carry their own noise, so the signal-layer SNR for a shared component grows only as √n, while DP-SGD adds noise once per aggregated step. Signal-layer release can only win if DP-SGD's effective dimension is large relative to n, which is exactly what Phase 2 has to measure.
+- **Toy G1 passes.** Trained on half A, R2 gains 18.0 points on half-A problems and 12.7 on half-B problems (71%); R3 gains 19.0 and 12.1 (64%).
+- **Off-policy beat on-policy.** M2a (off-policy synthetic SFT) beat M2b (on-policy chunks) at equal per-record budget: +2.1 [+0.2, +4.0] at ε = 4 and +4.1 [+2.9, +5.3] at ε = 8. M2a's budget went to 4 strong tokens per record, M2b's to 16 weak ones.
+- **The filter bought nothing here.** M3 vs M2b: +0.4 [−0.7, +1.5] at ε = 4. The toy teacher shifts every token by the same amount, so there are no cold tokens to save on (Finding 6). The filter spent its budget exactly (ledger at 1.00).
+- **Audits.**
+  - The selection-swap audit found 0 changed selections for M2b and M3; a DIAL-style private selection changed the swapped record's pick, as it should.
+  - The canary audit was uninformative in this toy. Even non-private SFT shows no leakage (lower bound 0, AUROC ≤ 0.55), because a 790-parameter log-linear student cannot memorise random canary answers. H4's leakage half needs the LLM.
+- **The parameter-dimension sweep was inconclusive.** Adding irrelevant features (d = 10,390 and 82,070) also wiped out the non-private headroom: R2 fell to 42.2 and 41.9, around base. So every arm sat at base, and the sweep cannot separate noise geometry. The table is in the full results. A corrected sweep needs a model whose non-private headroom survives at large d.
+
+Process notes: the first evaluation reused the ε = 4 λ̂ at ε = 1 and 8. Those runs are kept under `eval_superseded` in `e5.json`, and with the ε-matched λ̂ M2a at ε = 8 rose from 49.9 to 51.9. A parallel-rollout overspend in M3 was caught by the ledger check before any reported run (Finding 7).
 
 ## What the LLM run needs
 

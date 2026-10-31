@@ -132,10 +132,18 @@ def main():
                              "tried": [(s, k) for s, k, _ in tried[a]]} for a in ARMS}
         print(f"tuned in {time.time()-t0:.0f}s", {a: best[a][0] for a in ARMS}, flush=True)
 
-        def kw_of(a, b=best):
+        # lam_hat is a public statistic of the mechanism at a given eps: measure it
+        # on the proxy task at every eps (at eps = 4 it is the tuning run's value)
+        lam_eps = {(a, 4.0): best[a][1] for a in LAM_ARMS}
+        for a in LAM_ARMS:
+            for e in (1.0, 8.0):
+                lam_eps[(a, e)] = measure_lam_hat(pool, a, best[a][0], e, base_cfg, N)
+        res["lam_hat_by_eps"] = {f"{a}@{e:g}": v for (a, e), v in lam_eps.items()}
+
+        def kw_of(a, eps=4.0, b=best):
             kw = dict(b[a][0])
-            if a in ("M2a", "M2b", "M3"):
-                kw["lam_hat"] = b[a][1]
+            if a in LAM_ARMS:
+                kw["lam_hat"] = lam_eps[(a, eps)]
             return kw
 
         jobs = [("R0", {}, math.inf, MAIN_TASK, 1, 0, base_cfg, N, False)]
@@ -144,7 +152,7 @@ def main():
         for a in ["B1", "B2", "M1", "M2a", "M2b", "M3"]:
             for eps in [1.0, 4.0, 8.0]:
                 seeds = range(5) if eps == 4.0 else range(3)
-                jobs += [(a, kw_of(a), eps, MAIN_TASK, 1, s, base_cfg, N, False) for s in seeds]
+                jobs += [(a, kw_of(a, eps), eps, MAIN_TASK, 1, s, base_cfg, N, False) for s in seeds]
         res["eval"] = pool.map(run_one, jobs)
         print(f"main grid done {time.time()-t0:.0f}s", flush=True)
 
@@ -178,6 +186,43 @@ def main():
     res["swap"] = swap_audit()
     with open(os.path.join(OUT, "e5.json"), "w") as f:
         json.dump(res, f, indent=1, default=float)
+    write_tables(res)
+
+
+LAM_ARMS = ("M2a", "M2b", "M3")
+
+
+def measure_lam_hat(pool, arm, kw, eps, cfg_kw, n):
+    """Mean realized lambda of ``arm`` at ``eps`` on the public proxy task (2 seeds)."""
+    res = pool.map(run_one, [(arm, kw, eps, PROXY_TASK, 500, s, cfg_kw, n, True) for s in (0, 1)])
+    return float(np.mean([r["lam"][-1] for r in res]))
+
+
+def lamfix():
+    """Re-evaluate M2a/M2b/M3 at eps = 1 and 8 with lam_hat measured at that eps.
+
+    Results from runs that used the eps = 4 lam_hat at every eps are kept under
+    'eval_superseded' for transparency."""
+    path = os.path.join(OUT, "e5.json")
+    res = json.load(open(path))
+    with Pool(4) as pool:
+        lam = {}
+        for a in LAM_ARMS:
+            kw = res["tuning"][a]["best_kw"]
+            lam[(a, 4.0)] = res["tuning"][a]["lam_hat"]
+            for e in (1.0, 8.0):
+                lam[(a, e)] = measure_lam_hat(pool, a, kw, e, {}, N)
+        res["lam_hat_by_eps"] = {f"{a}@{e:g}": v for (a, e), v in lam.items()}
+        jobs = [(a, dict(res["tuning"][a]["best_kw"], lam_hat=lam[(a, e)]), e, MAIN_TASK, 1, s, {}, N, False)
+                for a in LAM_ARMS for e in (1.0, 8.0) for s in range(3)]
+        new = pool.map(run_one, jobs)
+    keep, old = [], []
+    for r in res["eval"]:
+        (old if (r["arm"] in LAM_ARMS and r["eps"] in (1.0, 8.0)) else keep).append(r)
+    res["eval"] = keep + new
+    res["eval_superseded"] = old
+    json.dump(res, open(path, "w"), indent=1, default=float)
+    print(res["lam_hat_by_eps"])
     write_tables(res)
 
 
@@ -345,5 +390,7 @@ def write_tables(res):
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "tables":
         write_tables(json.load(open(os.path.join(OUT, "e5.json"))))
+    elif len(sys.argv) > 1 and sys.argv[1] == "lamfix":
+        lamfix()
     else:
         main()

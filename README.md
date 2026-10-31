@@ -46,4 +46,4 @@ venv/bin/python -m pytest -q tests
 for e in e0_budget e1_efficiency e2_filter_witness e3_audit e4_simulator e5_pilot make_figures; do venv/bin/python experiments/$e.py; done
 ```
 
-Run times on 4 CPUs: E0 3 min, E1 20 s, E2 1 min, E3 25 s, E4 about 22 min, E5 about 45 min.
+Run times on 4 CPUs: E0 3 min, E1 20 s, E2 1 min, E3 25 s, E4 about 22 min, E5 about 31 min (plus 40 s for `e5_pilot.py lamfix`, which re-measures λ̂ per ε for M2/M3 at ε = 1 and 8 when updating an existing e5.json; a fresh run measures it directly).

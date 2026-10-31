@@ -39,6 +39,17 @@ plt.rcParams.update({
 })
 
 
+def spread(vals, gap):
+    """Shift sorted label positions apart so neighbours are at least ``gap`` apart."""
+    order = np.argsort(vals)
+    out = np.array(vals, float)
+    for i in range(1, len(order)):
+        a, b = order[i - 1], order[i]
+        if out[b] - out[a] < gap:
+            out[b] = out[a] + gap
+    return out
+
+
 def label_end(ax, x, y, text, color, dy=0):
     ax.annotate(text, (x, y), xytext=(6, dy), textcoords="offset points", va="center", color=INK, fontsize=9)
 
@@ -143,51 +154,57 @@ def fig_pilot():
         return
     res = json.load(open(p))
     ev = res["eval"]
-    fig, axes = plt.subplots(1, 2, figsize=(9.6, 3.8))
+    col = {"B1": C[0], "B2": C[1], "M1": C[2], "M2b": C[3], "M2a": "#e87ba4"}
+    mk = {"B1": "o", "B2": "s", "M1": "^", "M2b": "D", "M2a": "v"}
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.0), sharey=True)
     ax = axes[0]
     eps_l = [1.0, 4.0, 8.0]
-    for i, a in enumerate(["B1", "B2", "M1", "M2b"]):
+    ends = {}
+    for a in ["B1", "B2", "M1", "M2a", "M2b"]:
         m, e = [], []
         for eps in eps_l:
             xs = [100 * r["exact"] for r in ev if r["arm"] == a and r["eps"] == eps]
             m.append(np.mean(xs))
             e.append(np.std(xs, ddof=1))
-        ax.errorbar(eps_l, m, yerr=e, color=C[i], marker=MK[i], capsize=3, label=a)
-        label_end(ax, eps_l[-1], m[-1], a, C[i])
-    for a, lab in [("R0", "R0 base"), ("R2", "R2 OPSD (non-private)")]:
+        ax.errorbar(eps_l, m, yerr=e, color=col[a], marker=mk[a], capsize=3, label=a)
+        ends[a] = m[-1]
+    for a, y in zip(ends, spread(list(ends.values()), 1.6)):
+        ax.annotate(a, (eps_l[-1] * 1.12, y), va="center", color=INK, fontsize=9)
+    for a, lab, dy, x, ha in [("R0", "R0 base", -10, 8.0, "right"), ("R2", "R2 OPSD, non-private", 4, 0.9, "left")]:
         v = 100 * np.mean([r["exact"] for r in ev if r["arm"] == a])
         ax.axhline(v, color=REF, lw=1)
-        ax.annotate(lab, (1.0, v), xytext=(0, 4), textcoords="offset points", color=INK2, fontsize=9)
+        ax.annotate(lab, (x, v), xytext=(0, dy), textcoords="offset points", color=INK2, fontsize=9, ha=ha)
     ax.set_xscale("log", base=2)
     ax.set_xticks(eps_l, ["1", "4", "8"])
-    ax.set_xlim(0.85, 11)
-    ax.set_xlabel("eps (delta = 1e-6)")
+    ax.set_xlim(0.85, 12)
+    ax.set_xlabel("eps (delta = 1e-6), n = 4,096")
     ax.set_ylabel("held-out exact match (%)")
-    ax.set_title("Toy pilot, n = 4,096", loc="left")
-    ax.legend(loc="lower right", fontsize=8)
+    ax.set_title("DP-SGD (B1) leads at eps 1 and 4", loc="left")
     ax = axes[1]
-    rows = ev + res["dsweep"]
-    ds = {0: 790, 240: 10390, 2032: 82070}
-    for i, a in enumerate(["B1", "B2", "M1", "M2b"]):
-        xs, ys = [], []
-        for pad, d in ds.items():
-            v = [100 * r["exact"] for r in rows if r["arm"] == a and r["eps"] == 4.0 and r["cfg"].get("p_pad", 0) == pad
-                 and r["n"] == 4096]
-            if v:
-                xs.append(d)
-                ys.append(np.mean(v))
-        ax.plot(xs, ys, color=C[i], marker=MK[i], label=a)
-        if xs:
-            label_end(ax, xs[-1], ys[-1], a, C[i])
-    for a, lab in [("R0", "R0 base")]:
-        v = [100 * r["exact"] for r in rows if r["arm"] == a and r["cfg"].get("p_pad", 0) == 0 and r["n"] == 4096]
-        ax.axhline(np.mean(v), color=REF, lw=1)
-        ax.annotate(lab, (790, np.mean(v)), xytext=(0, 4), textcoords="offset points", color=INK2, fontsize=9)
-    ax.set_xscale("log")
-    ax.set_xlim(500, 250000)
-    ax.set_xlabel("trainable parameters d (log scale)")
-    ax.set_title("Same task, more parameters, eps = 4", loc="left")
-    fig.tight_layout()
+    rows = ev + res["nsweep"]
+    ns = [1024, 4096, 16384]
+    for a in ["B1", "B2", "M1", "M2b", "R2"]:
+        eps = math.inf if a == "R2" else 4.0
+        ys = [100 * np.mean([r["exact"] for r in rows if r["arm"] == a and r["eps"] == eps and r["n"] == n
+                             and not r["cfg"].get("p_pad")]) for n in ns]
+        if a == "R2":
+            ax.plot(ns, ys, color=REF, lw=1.5, marker="")
+            ax.annotate("R2 non-private", (ns[-1], ys[-1]), xytext=(7, 0), textcoords="offset points", va="center",
+                        color=INK2, fontsize=9)
+        else:
+            ax.plot(ns, ys, color=col[a], marker=mk[a], label=a)
+            ax.annotate(a, (ns[-1], ys[-1]), xytext=(7, {"B1": 4, "B2": -4}.get(a, 0)), textcoords="offset points",
+                        va="center", color=INK, fontsize=9)
+    ax.set_xscale("log", base=2)
+    ax.set_xticks(ns, [f"{n:,}" for n in ns])
+    ax.set_xlim(800, 40000)
+    ax.set_xlabel("records n, eps = 4")
+    ax.set_title("DP-SGD gains faster with n than signal-layer arms", loc="left")
+    h, l = axes[0].get_legend_handles_labels()
+    fig.legend(h, l, loc="lower center", ncol=5, fontsize=8)
+    fig.suptitle("Toy pilot (log-linear student, d = 790), not the LLM experiment", x=0.01, ha="left",
+                 fontweight="bold", color=INK)
+    fig.tight_layout(rect=(0, 0.07, 1, 1))
     fig.savefig(os.path.join(FIG, "pilot.png"), dpi=160)
     plt.close(fig)
 
