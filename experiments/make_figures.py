@@ -54,11 +54,16 @@ def fig_audit():
     ax.plot(ms, ce, color=C[0], marker="o", label="highest eps any attacker can certify")
     for claim in (4, 8):
         ax.axhline(claim, color=REF, lw=1)
-        ax.annotate(f"claimed eps = {claim}", (ms[0], claim), xytext=(0, 4), textcoords="offset points",
-                    color=INK2, fontsize=9)
+        if claim == 4:
+            ax.annotate(f"claimed eps = {claim}", (ms[-1], claim), xytext=(0, -12), textcoords="offset points",
+                        color=INK2, fontsize=9, ha="right")
+        else:
+            ax.annotate(f"claimed eps = {claim}", (300, claim), xytext=(0, 4), textcoords="offset points",
+                        color=INK2, fontsize=9, ha="left")
     ax.axvline(128, color=C[1], lw=1.5)
     ax.annotate("plan: 128 canaries", (128, 0.4), xytext=(5, 0), textcoords="offset points", color=INK, fontsize=9)
     ax.set_xscale("log", base=2)
+    ax.set_xticks(ms, [f"{m:,}" for m in ms])
     ax.set_xlabel("canaries m (log scale)")
     ax.set_ylabel("95% lower bound on eps")
     ax.set_ylim(0, 9.5)
@@ -79,7 +84,8 @@ def fig_filter_gain():
         f = [r["f_hot"] for r in rs]
         g = [r["report"]["filter"]["0.03"]["gain_tokens_vs_fixed"] for r in rs]
         ax.plot(f, g, color=C[i], marker=MK[i], label=f"cold-token logit noise tau = {tau}")
-        label_end(ax, f[-1], g[-1], f"tau = {tau}", C[i], dy=[8, 0, -8][i])
+        ax.annotate(f"tau = {tau}", (f[0], g[0]), xytext=(8, -12) if i == 0 else (4, 9), textcoords="offset points",
+                    color=INK, fontsize=9)
     ax.axhline(3, color=REF, lw=1)
     ax.annotate("G0 gate: 3x", (0.02, 3), xytext=(0, 4), textcoords="offset points", color=INK2, fontsize=9)
     ax.set_xscale("log")
@@ -122,10 +128,11 @@ def fig_sim():
         ax.set_title(f"{world} world, eps = 4", loc="left")
     axes[0].set_ylabel("headroom recovered H")
     axes[0].set_ylim(-0.3, 1.05)
-    axes[1].legend(loc="lower right", fontsize=8)
-    fig.suptitle("Simulator: DP-Fusion with a q0 anchor recovers the most headroom", x=0.01, ha="left",
-                 fontweight="bold", color=INK)
-    fig.tight_layout()
+    h, l = axes[1].get_legend_handles_labels()
+    fig.legend(h, l, loc="lower center", ncol=5, fontsize=8)
+    fig.suptitle("Simulator at eps = 4: utility grows with n; the uniform anchor and sampled-token Gaussian trail",
+                 x=0.01, ha="left", fontweight="bold", color=INK)
+    fig.tight_layout(rect=(0, 0.07, 1, 1))
     fig.savefig(os.path.join(FIG, "simulator_n.png"), dpi=160)
     plt.close(fig)
 
