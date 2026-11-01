@@ -6,7 +6,7 @@ Code, data and results for the plan "DP Privileged-Context Distillation: Experim
 
 ## What ran here
 
-This session had 4 CPUs, no GPU, and no access to `huggingface.co`, so Qwen3-1.7B could not be loaded. Everything in the plan that does not need the LLM was run in full. The LLM phases have a CPU toy pilot in their place, and it is labelled as such everywhere.
+E0–E5 ran in a session with 4 CPUs, no GPU, and no access to `huggingface.co`, so Qwen3-1.7B could not be loaded there. Everything in the plan that does not need the LLM was run in full, and a toy pilot stands in for the training phases; it is labelled as such everywhere. G0 was then run on Qwen3-1.7B on a GPU (inference only). Training (Phases 1–2) has not been run.
 
 | Experiment | Plan item | Script | Results |
 |---|---|---|---|
@@ -16,6 +16,7 @@ This session had 4 CPUs, no GPU, and no access to `huggingface.co`, so Qwen3-1.7
 | E3 | Phase 3 one-run audit validation and leak demonstration | `experiments/e3_audit.py` | `results/e3_audit/` |
 | E4 | Analytic categorical simulator (direction 4, ablation predictions) | `experiments/e4_simulator.py` | `results/e4_simulator/` |
 | E5 | Toy CPU pilot of all ten arms with canary audits | `experiments/e5_pilot.py` | `results/e5_pilot/` |
+| G0 | Phase 0 on Qwen3-1.7B (GSM8K): divergence profile, public-nucleus variant, mixture-teacher accuracy; inference only, run on a GPU outside this container | `results/g0/g0.py`, `results/g0/g0b.py` | `results/g0/` |
 
 ## Library (`dpcd/`)
 

@@ -1,8 +1,10 @@
-# Results: DP privileged-context distillation (31 Oct 2026)
+# Results: DP privileged-context distillation (updated 1 Nov 2026)
 
-Everything in the plan that runs without the LLM has been run: the Phase 0 accountant and budget table, the efficiency-estimate machinery, the Phase 3 filter witness and audit validation, the analytic simulator, and a toy CPU pilot of all ten arms. The LLM phases (G0 divergence profile and teacher headroom, Phase 1, Phase 2, the LLM audits) did not run. This environment has no GPU and cannot reach `huggingface.co`. **No gate (G0, G1, G2) has been decided.**
+**G0 has been run on Qwen3-1.7B (GSM8K) and fails; M3 is dropped.** Privileged context is worth +16.6 points to the unconstrained teacher (77.8% → 94.4%). Inside the ε = 4 budget, the mixture teacher gains at most +1.8 points against a +5 gate. The budget is the bottleneck: μ² ≈ 0.62 per record, spread over about 250 tokens (Finding 10, [G0](#g0-qwen3-17b-on-gsm8k)). G1 and G2 have not been run.
 
-The zero-GPU work found five problems in the plan that should be fixed before GPU time is spent (Findings 1–5). Findings 6–9 are about the method. In the toy pilot, tuned DP-SGD beat every signal-layer arm at ε = 4, and the gap widened with n (Finding 9). That makes H3 the riskiest hypothesis.
+Everything else in the plan that runs without training the LLM has also been run: the Phase 0 accountant and budget table, the efficiency-estimate machinery, the Phase 3 filter witness and audit validation, the analytic simulator, and a toy CPU pilot of all ten arms. G0 ran on a GPU outside this container (inference only). Phases 1–2 and the LLM audits have not been run.
+
+The zero-GPU work found five problems in the plan to fix before training (Findings 1–5). Findings 6–10 are about the method. In the toy pilot, tuned DP-SGD beat every signal-layer arm at ε = 4, and the gap widened with n (Finding 9). G0 now points the same way on the real model.
 
 ## Findings that change the plan
 
@@ -14,10 +16,11 @@ The zero-GPU work found five problems in the plan that should be fixed before GP
 
 ## Findings about the method
 
-6. **The filter's gain is set by the cold-token floor.** The gain of realized-divergence accounting over a fixed b₂ is b₂ / E[min(D_t, b₂)]. It clears the 3× gate only when most tokens carry divergence well below b₂, roughly a median μ_t² under b₂/10, with under about 20% hot tokens. If putting r in context perturbs every token a little, the gain disappears (E1). Record-specific divergence also uses up the filter's budget (simulator: the filter gains 2.5× in utility at τ = 0 and nothing at τ = 0.5, E4). The first thing to measure in G0 is the median per-token divergence on Qwen3 rollouts.
+6. **The filter's gain is set by the cold-token floor.** The gain of realized-divergence accounting over a fixed b₂ is b₂ / E[min(D_t, b₂)]. It clears the 3× gate only when most tokens carry divergence well below b₂, roughly a median μ_t² under b₂/10, with under about 20% hot tokens. If putting r in context perturbs every token a little, the gain disappears (E1). Record-specific divergence also uses up the filter's budget (simulator: the filter gains 2.5× in utility at τ = 0 and nothing at τ = 0.5, E4). G0 measured this on Qwen3: the median μ_t² at ε = 4 is 0.10 over the full vocabulary, and the gate failed (Finding 10).
 7. **The filter is valid, and the checks catch real bugs.** Across 72 toy LMs, the exact Rényi divergence of the whole filtered run never exceeds its budget; the maximum ratio is exactly 1.000. A last-token overspend control violated the budget in 57/72 runs and a wrong-order control in 72/72 (E2). Our own pilot had a parallel-rollout overspend bug (ledger at 1.22× budget), which the ledger assertion caught and we fixed (E5).
 8. **Direction ④'s conjecture is not supported.** In the simulator, DP widens the gap between sampled-token and full-distribution feedback rather than collapsing it. The gap is 0.12 headroom non-privately and 0.24 at ε = 4 (state world, n = 4,096) (E4). One caveat: the simulator's vocabulary has 32 tokens, and a full-vector Gaussian release over a 150k vocabulary would not be practical.
 9. **In the toy pilot, DP-SGD wins and pulls further ahead as n grows.** At ε = 4 the best signal-layer arm trailed B1 (DP-SFT) by 4.6 points (paired difference −4.6, 95% CI [−6.2, −3.0]). B1's lead over M1, M2b and M3 grew from 1.8 to 10.4 points as n went from 1,024 to 16,384. Per-record releases carry independent noise, so their SNR grows as √n, while DP-SGD aggregates before adding noise. H3 therefore depends on DP-SGD's effective dimension for LoRA on Qwen3 being large relative to n. Run B1 against the best M arm at n = 4,096 early in Phase 2 (the plan's "DP-SGD dominates" early signal), before committing to the full 90-run grid (E5).
+10. **On Qwen3, the ε = 4 per-record budget is too small for a privileged teacher on full solutions.** Over the full vocabulary, 57% of tokens are hot, so the filter gains only 1.7–1.9×; Finding 6's concern was right, and the cause is high-order Rényi tails. Restricting both distributions to q0's public nucleus brings the hot share down to 11–20% and the gain up to 4.9–10×. Even so, no budget-feasible mixture teacher beats q0 by more than 1.8 points, because μ² ≈ 0.62 spread over about 250 tokens leaves b₂ ≈ 0.0025 per token. M2a trains on samples from this same mixture, so it starts weak (G0).
 
 ## Status by plan item
 
@@ -25,9 +28,10 @@ The zero-GPU work found five problems in the plan that should be fixed before GP
 |---|---|---|
 | Phase 0: accountant tests | Done; 20 unit tests pass | `tests/`, E0 |
 | Phase 0: budget table | Reproduced exactly; RDP-accounted version added | E0 |
-| Phase 0: divergence profile on Qwen3 rollouts | Blocked (model access, GPU) | estimator ready: `dpcd/efficiency.py` |
-| Phase 0: efficiency estimate | Machinery done, run on synthetic profiles only | E1 |
-| Phase 0: teacher headroom | Blocked (model access, GPU) | |
+| Phase 0: divergence profile on Qwen3 rollouts | Done on GSM8K (500 records × 4 rollouts, 502k tokens) | G0 |
+| Phase 0: efficiency estimate | Done on Qwen3: filter gain 1.7–1.9× at ε = 4 (full vocabulary), 4.9–10× on q0's nucleus | G0, E1 |
+| Phase 0: teacher headroom | Done: unconstrained teacher +16.6 points; budget-feasible mixture at most +1.8 | G0 |
+| **Gate G0** | **Fails** (filter gate fails on the full vocabulary; mixture-teacher gate fails everywhere). M3 dropped, including the nucleus variant | G0 |
 | Phase 1: headroom, shared component, leakage | Toy pilot only: +15.5 headroom, half-split keeps 64–71%, no leakage measurable in the toy | E5 |
 | Phase 2: main DP grid | Toy pilot only: best M arm − best B arm = −4.6 points at ε = 4 | E5 |
 | Phase 3: filter witness | Done (exact enumeration) | E2 |
@@ -36,6 +40,40 @@ The zero-GPU work found five problems in the plan that should be fixed before GP
 | Phase 3: leak demonstration | Done in simulation; only caught with enough canaries | E3 |
 | Ablations: predictions | Tested in the simulator; on-policy vs off-policy tested in the toy pilot | E4, E5 |
 | Direction ④: reverse-KL limits under DP | Tested in the simulator | E4 |
+
+## G0: Qwen3-1.7B on GSM8K
+
+Inference only, run on one A6000 outside this container (about 26 minutes for the first pass). Scripts, logs and JSON reports are in [results/g0/](results/g0/README.md); the per-token profiles (npz) are not in the repository. The model is Qwen3-1.7B in bf16 with thinking off. r is the GSM8K gold worked solution, placed in the prompt. All arms use the two-sided Rényi divergence at the RDP order for each ε (22, 7 and 4 for ε = 1, 4 and 8), in μ_t² = 2D_α/α units.
+
+**Teacher headroom** (GSM8K test[:500], greedy): q0 77.8%, teacher with r 94.4%, a gain of 16.6 points.
+
+**Divergence profile** (500 GSM8K train records × 4 rollouts at T = 1, 502k tokens). The nucleus rows restrict both q and q0 to q0's top-p nucleus and renormalise. That support is public, so this is a valid new variant, but it was not pre-registered.
+
+| Support | ε | Hot share (μ_t² > 0.01) | Filter gain over fixed b₂ = 0.01 / 0.03 / 0.1 | Teacher mass outside the support (mean) | M1 efficiency, c = 0.5 / 1 / 2 |
+|---|---|---|---|---|---|
+| full vocabulary | 1 | 98% | 1.02 / 1.02 / 1.07 | 0 | 9% / 6% / 4% |
+| full vocabulary | 4 | 57% | 1.69 / 1.76 / 1.87 | 0 | 9% / 6% / 4% |
+| full vocabulary | 8 | 40% | 2.34 / 2.50 / 2.73 | 0 | 9% / 6% / 4% |
+| q0 nucleus, p = 0.9 | 4 | 11% | 8.8 / 9.3 / 10.1 | 2.9% | 6% / 4% / 2% |
+| q0 nucleus, p = 0.95 | 4 | 14% | 6.9 / 7.2 / 7.9 | 2.2% | 7% / 5% / 3% |
+| q0 nucleus, p = 0.99 | 4 | 20% | 4.9 / 5.1 / 5.5 | 1.3% | 8% / 5% / 3% |
+
+**Mixture-teacher accuracy inside the ε = 4 budget** (GSM8K test[:500], %). The budget is μ² = 0.621 per record; mean solution length is 251 tokens, so b₂ ≈ 0.0025 per token. The filter charges realized cost and falls back to q0 once the budget is spent.
+
+| Decoding | q0 | Fixed b₂ = 0.0025 | Fixed b₂ = 0.01 (about 4× the budget) | Filter |
+|---|---|---|---|---|
+| full vocabulary, greedy | 78.0 | 78.6 | 78.6 | 78.2 |
+| full vocabulary, sampled | 77.2 | 79.0 | 77.4 | 79.0 |
+| nucleus p = 0.95, greedy | 78.0 | 78.6 | 78.8 | 77.6 |
+| nucleus p = 0.95, sampled | 77.4 | 78.8 | 78.8 | 76.4 |
+
+- **The filter gate fails as pre-registered.** On the full vocabulary the gain is 1.7–1.9× at ε = 4 and 1.02–1.07× at ε = 1. The cause is tails: high-order Rényi over a 150k vocabulary weighs rare tokens with large likelihood ratios. The gain grows as the order falls, reaching 2.3–2.7× at ε = 8 (order 4).
+- **The public nucleus removes the tail.** The hot share falls to 11–20% and the gain rises to 4.9–10×, while discarding 1.3–2.9% of the teacher's mass on average (median about 0).
+- **The mixture-teacher gate fails everywhere.** The best cell is +1.8 points over q0 against a +5 gate; the one-proportion standard error at n = 500 is about 1.9 points. Even about 4× the budget gives at most +1.4. With the filter, 67–69% of full-vocabulary solutions and all p = 0.95 solutions exhaust the budget before they finish. The teacher's signal is diluted across about 250 tokens, so making individual tokens cheaper does not help.
+- **M1 is 4–9% efficient** on the full vocabulary and 2–8% on the nucleus. The tokens the student samples carry almost none of the log-ratio, as in E1 and E4.
+- **Caveats, none of which change the verdict:**
+  - The fixed-b₂ arms had no length cap, so about half of their solutions overspent the budget, which favours them.
+  - The filter's ledger ran in float32 and ends 2e-6 to 1.3e-5 above the budget, so its "over budget" share counts records that exactly exhausted it. A training-time ledger should use float64 with a strict check, as `dpcd.mechanisms.RenyiFilter` does.
 
 ## E0: budget table and accounting checks
 
@@ -152,9 +190,10 @@ Held-out exact match (%), mean ± sd over training seeds (5 at ε = 4, 3 otherwi
 
 Process notes: the first evaluation reused the ε = 4 λ̂ at ε = 1 and 8. Those runs are kept under `eval_superseded` in `e5.json`, and with the ε-matched λ̂ M2a at ε = 8 rose from 49.9 to 51.9. A parallel-rollout overspend in M3 was caught by the ledger check before any reported run (Finding 7).
 
-## What the LLM run needs
+## Next steps
 
-- Network: allow `huggingface.co` in the environment's network settings to load Qwen3-1.7B and the math and MedMCQA data.
-- Compute: GPUs for Phases 1–2. The plan's rough estimate is 500–800 H100-hours for Phase 2.
-- Before the first GPU run, fix the plan per Findings 1–5: M1's σ, B2's accountant, RDP orders, canary counts, and public λ̂. The library code here already does all five.
-- Run the G0 divergence profile first, with `dpcd/efficiency.py` on (q, q0, sampled-token) arrays from 500 records × 4 rollouts. The median per-token divergence settles the filter question immediately (Finding 6).
+- **The planned next run departs from the pre-registered G0 rule.** For a failed mixture-teacher condition, the plan says: "no signal-layer arm can win: run Phase 1 only and write up the information-equivalence result." Running B1 against M2a at n = 4,096 goes beyond that, so label it exploratory and fix its stopping rule before training. For example: if M2a does not beat tuned B1 at ε = 4 (3 seeds, paired 95% interval above zero), stop the signal-layer arms and write up.
+- **The run is still informative,** because the gate measures a single sample from the mixture teacher. M2a's student pools many weak samples. If it fits them with a mixture likelihood (λ̂π + (1 − λ̂)q0, with λ̂ measured on a public proxy split at each ε), it can move past the mixture teacher toward q_r. Plain imitation of the samples cannot beat the ≈ q0 teacher. In the toy pilot, the debiased M2a still trailed B1 by 4.6 points at ε = 4 (E5).
+- **Tune B1 until its best learning rate is interior**, as the engineering checklist requires; an under-tuned DP-SGD baseline would flatter M2a.
+- **Phase 1 still runs under the plan's rule.** Its half-split shared-component check also bounds what B1 can deliver.
+- **Apply Findings 1–5 in the training code:** M1's σ, B2's accountant, RDP orders, canary counts, and the public λ̂. The library code here already does all five.
