@@ -1,0 +1,8 @@
+Using the latest cached version of the dataset since openai/gsm8k couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'main' at /home/wlwuser/.cache/huggingface/datasets/openai___gsm8k/main/0.0.0/740312add88f781978c0658806c59bc2815b9866 (last modified on Sun Nov  1 02:15:40 2026).
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 24.55it/s]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[    147s] eval dev 0.798 +- 0.01795527777562909
+[    504s] eval test 0.77710386656558 +- 0.011459572184127057
+[    504s] DONE /home/wlwuser/dppcd_b1m2a/res/base.json

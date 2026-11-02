@@ -1,0 +1,58 @@
+Using the latest cached version of the dataset since openai/gsm8k couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'main' at /home/wlwuser/.cache/huggingface/datasets/openai___gsm8k/main/0.0.0/740312add88f781978c0658806c59bc2815b9866 (last modified on Sun Nov  1 02:15:40 2026).
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 20.88it/s]
+[     53s] M2a ep0 step 20 loss=0.1161
+[     99s] M2a ep0 step 40 loss=0.1333
+[    145s] M2a ep0 step 60 loss=0.1342
+[    190s] M2a ep0 step 80 loss=0.1214
+[    235s] M2a ep0 step 100 loss=0.1194
+[    281s] M2a ep0 step 120 loss=0.0967
+[    327s] M2a ep0 step 140 loss=0.1190
+[    372s] M2a ep0 step 160 loss=0.1153
+[    417s] M2a ep0 step 180 loss=0.1148
+[    464s] M2a ep0 step 200 loss=0.1078
+[    510s] M2a ep0 step 220 loss=0.1129
+[    556s] M2a ep0 step 240 loss=0.1264
+[    602s] M2a ep0 step 260 loss=0.1046
+[    649s] M2a ep0 step 280 loss=0.1348
+[    696s] M2a ep0 step 300 loss=0.0973
+[    741s] M2a ep0 step 320 loss=0.1147
+[    787s] M2a ep0 step 340 loss=0.1215
+[    832s] M2a ep0 step 360 loss=0.1014
+[    877s] M2a ep0 step 380 loss=0.0996
+[    923s] M2a ep0 step 400 loss=0.1284
+[    970s] M2a ep0 step 420 loss=0.1036
+[   1015s] M2a ep0 step 440 loss=0.1001
+[   1061s] M2a ep0 step 460 loss=0.1132
+[   1107s] M2a ep0 step 480 loss=0.1260
+[   1154s] M2a ep0 step 500 loss=0.1232
+[   1199s] M2a ep1 step 520 loss=0.0882
+[   1245s] M2a ep1 step 540 loss=0.1164
+[   1290s] M2a ep1 step 560 loss=0.1106
+[   1336s] M2a ep1 step 580 loss=0.0912
+[   1382s] M2a ep1 step 600 loss=0.0807
+[   1429s] M2a ep1 step 620 loss=0.1032
+[   1475s] M2a ep1 step 640 loss=0.0891
+[   1521s] M2a ep1 step 660 loss=0.0926
+[   1567s] M2a ep1 step 680 loss=0.0863
+[   1613s] M2a ep1 step 700 loss=0.1028
+[   1658s] M2a ep1 step 720 loss=0.0842
+[   1704s] M2a ep1 step 740 loss=0.0920
+[   1750s] M2a ep1 step 760 loss=0.1169
+[   1795s] M2a ep1 step 780 loss=0.1024
+[   1842s] M2a ep1 step 800 loss=0.1154
+[   1887s] M2a ep1 step 820 loss=0.0791
+[   1933s] M2a ep1 step 840 loss=0.1082
+[   1979s] M2a ep1 step 860 loss=0.1238
+[   2025s] M2a ep1 step 880 loss=0.0989
+[   2071s] M2a ep1 step 900 loss=0.1070
+[   2117s] M2a ep1 step 920 loss=0.0793
+[   2162s] M2a ep1 step 940 loss=0.1192
+[   2208s] M2a ep1 step 960 loss=0.1159
+[   2253s] M2a ep1 step 980 loss=0.0965
+[   2298s] M2a ep1 step 1000 loss=0.1011
+[   2344s] M2a ep1 step 1020 loss=0.0954
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[   2556s] eval dev 0.794 +- 0.01808668018183547
+[   2556s] DONE /home/wlwuser/dppcd_b1m2a/res/m2a_lr0.0003_s0.json

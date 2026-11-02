@@ -1,0 +1,72 @@
+Using the latest cached version of the dataset since openai/gsm8k couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'main' at /home/wlwuser/.cache/huggingface/datasets/openai___gsm8k/main/0.0.0/740312add88f781978c0658806c59bc2815b9866 (last modified on Sun Nov  1 02:15:40 2026).
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:07<00:07,  7.98s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:08<00:00,  3.59s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:08<00:00,  4.25s/it]
+[    300s] B1 z 1.0322085016238123 eps 3.999543382679587 steps 64
+[    370s] B1 step 1/64 B=265 med_norm=14.013 last_loss=1.957
+[    432s] B1 step 2/64 B=248 med_norm=14.042 last_loss=2.099
+[    501s] B1 step 3/64 B=275 med_norm=9.539 last_loss=1.987
+[    568s] B1 step 4/64 B=267 med_norm=6.255 last_loss=0.742
+[    625s] B1 step 5/64 B=231 med_norm=4.288 last_loss=0.893
+[    688s] B1 step 6/64 B=256 med_norm=3.039 last_loss=0.521
+[    758s] B1 step 7/64 B=272 med_norm=2.451 last_loss=1.089
+[    828s] B1 step 8/64 B=273 med_norm=2.308 last_loss=0.891
+[    896s] B1 step 9/64 B=269 med_norm=2.356 last_loss=0.468
+[    957s] B1 step 10/64 B=242 med_norm=2.317 last_loss=0.841
+[   1024s] B1 step 11/64 B=267 med_norm=2.324 last_loss=0.646
+[   1084s] B1 step 12/64 B=257 med_norm=2.360 last_loss=1.129
+[   1136s] B1 step 13/64 B=228 med_norm=2.426 last_loss=1.179
+[   1192s] B1 step 14/64 B=243 med_norm=2.279 last_loss=0.515
+[   1253s] B1 step 15/64 B=263 med_norm=2.398 last_loss=0.763
+[   1314s] B1 step 16/64 B=259 med_norm=2.348 last_loss=0.924
+[   1365s] B1 step 17/64 B=225 med_norm=2.371 last_loss=0.803
+[   1419s] B1 step 18/64 B=234 med_norm=2.447 last_loss=0.813
+[   1477s] B1 step 19/64 B=250 med_norm=2.497 last_loss=0.790
+[   1539s] B1 step 20/64 B=258 med_norm=2.504 last_loss=0.789
+[   1606s] B1 step 21/64 B=266 med_norm=2.515 last_loss=0.524
+[   1668s] B1 step 22/64 B=246 med_norm=2.574 last_loss=0.781
+[   1735s] B1 step 23/64 B=267 med_norm=2.580 last_loss=0.865
+[   1806s] B1 step 24/64 B=278 med_norm=2.562 last_loss=0.589
+[   1873s] B1 step 25/64 B=261 med_norm=2.653 last_loss=0.445
+[   1939s] B1 step 26/64 B=269 med_norm=2.789 last_loss=0.990
+[   2004s] B1 step 27/64 B=248 med_norm=2.621 last_loss=0.324
+[   2074s] B1 step 28/64 B=272 med_norm=2.478 last_loss=0.884
+[   2146s] B1 step 29/64 B=275 med_norm=2.624 last_loss=0.577
+[   2210s] B1 step 30/64 B=248 med_norm=2.582 last_loss=0.882
+[   2273s] B1 step 31/64 B=257 med_norm=2.620 last_loss=0.986
+[   2334s] B1 step 32/64 B=264 med_norm=2.576 last_loss=0.395
+[   2391s] B1 step 33/64 B=245 med_norm=2.505 last_loss=0.648
+[   2455s] B1 step 34/64 B=276 med_norm=2.662 last_loss=0.338
+[   2518s] B1 step 35/64 B=249 med_norm=2.512 last_loss=0.767
+[   2583s] B1 step 36/64 B=251 med_norm=2.412 last_loss=0.349
+[   2641s] B1 step 37/64 B=222 med_norm=2.491 last_loss=0.185
+[   2702s] B1 step 38/64 B=236 med_norm=2.512 last_loss=0.727
+[   2768s] B1 step 39/64 B=256 med_norm=2.433 last_loss=0.356
+[   2834s] B1 step 40/64 B=261 med_norm=2.434 last_loss=0.758
+[   2894s] B1 step 41/64 B=236 med_norm=2.419 last_loss=0.364
+[   2960s] B1 step 42/64 B=251 med_norm=2.613 last_loss=0.455
+[   3032s] B1 step 43/64 B=274 med_norm=2.437 last_loss=0.402
+[   3100s] B1 step 44/64 B=265 med_norm=2.347 last_loss=0.287
+[   3167s] B1 step 45/64 B=258 med_norm=2.451 last_loss=0.414
+[   3228s] B1 step 46/64 B=247 med_norm=2.520 last_loss=0.335
+[   3294s] B1 step 47/64 B=275 med_norm=2.381 last_loss=0.368
+[   3352s] B1 step 48/64 B=245 med_norm=2.423 last_loss=0.363
+[   3406s] B1 step 49/64 B=227 med_norm=2.382 last_loss=0.385
+[   3467s] B1 step 50/64 B=237 med_norm=2.515 last_loss=0.955
+[   3539s] B1 step 51/64 B=275 med_norm=2.603 last_loss=1.334
+[   3605s] B1 step 52/64 B=255 med_norm=2.352 last_loss=0.708
+[   3677s] B1 step 53/64 B=278 med_norm=2.457 last_loss=0.948
+[   3745s] B1 step 54/64 B=259 med_norm=2.414 last_loss=0.416
+[   3808s] B1 step 55/64 B=256 med_norm=2.573 last_loss=0.931
+[   3882s] B1 step 56/64 B=280 med_norm=2.460 last_loss=0.360
+[   3950s] B1 step 57/64 B=261 med_norm=2.425 last_loss=0.378
+[   4015s] B1 step 58/64 B=253 med_norm=2.586 last_loss=0.520
+[   4078s] B1 step 59/64 B=242 med_norm=2.456 last_loss=0.421
+[   4132s] B1 step 60/64 B=206 med_norm=2.454 last_loss=1.316
+[   4196s] B1 step 61/64 B=267 med_norm=2.577 last_loss=0.521
+[   4263s] B1 step 62/64 B=284 med_norm=2.560 last_loss=0.417
+[   4323s] B1 step 63/64 B=257 med_norm=2.500 last_loss=0.690
+[   4384s] B1 step 64/64 B=250 med_norm=2.481 last_loss=0.494
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[   4521s] eval dev 0.588 +- 0.02201163328787757
+[   4521s] DONE /home/wlwuser/dppcd_b1m2a/res/b1_lr0.001_s0.json

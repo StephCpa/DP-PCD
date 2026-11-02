@@ -1,0 +1,22 @@
+Using the latest cached version of the dataset since openai/gsm8k couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'main' at /home/wlwuser/.cache/huggingface/datasets/openai___gsm8k/main/0.0.0/740312add88f781978c0658806c59bc2815b9866 (last modified on Sun Nov  1 02:15:40 2026).
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:00<00:00,  1.57it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00,  3.13it/s]
+[     15s] gen proxy mu2 0.6216811271454566 b 0.000971376761164776
+[     68s] gen 64/1000 mean_lam=0.6337 ledger_max=0.412869/0.621681
+[    122s] gen 128/1000 mean_lam=0.6335 ledger_max=0.425182/0.621681
+[    173s] gen 192/1000 mean_lam=0.6324 ledger_max=0.461256/0.621681
+[    227s] gen 256/1000 mean_lam=0.6363 ledger_max=0.483714/0.621681
+[    279s] gen 320/1000 mean_lam=0.6455 ledger_max=0.483714/0.621681
+[    333s] gen 384/1000 mean_lam=0.6422 ledger_max=0.483714/0.621681
+[    384s] gen 448/1000 mean_lam=0.6419 ledger_max=0.483714/0.621681
+[    438s] gen 512/1000 mean_lam=0.6431 ledger_max=0.483714/0.621681
+[    488s] gen 576/1000 mean_lam=0.6433 ledger_max=0.483714/0.621681
+[    539s] gen 640/1000 mean_lam=0.6439 ledger_max=0.483714/0.621681
+[    591s] gen 704/1000 mean_lam=0.6451 ledger_max=0.483714/0.621681
+[    644s] gen 768/1000 mean_lam=0.6443 ledger_max=0.483714/0.621681
+[    696s] gen 832/1000 mean_lam=0.6442 ledger_max=0.483714/0.621681
+[    747s] gen 896/1000 mean_lam=0.6441 ledger_max=0.483714/0.621681
+[    798s] gen 960/1000 mean_lam=0.6434 ledger_max=0.483714/0.621681
+[    837s] gen 1000/1000 mean_lam=0.6425 ledger_max=0.483714/0.621681
+[    837s] syn acc 0.755 lam_mean 0.6425170754460098 DONE /home/wlwuser/dppcd_b1m2a/res/syn_proxy.json
